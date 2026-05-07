@@ -202,11 +202,13 @@ function drawEditor() {
   root.appendChild(fm);
   root.appendChild(pane);
   root.classList.toggle('focus-mode', state.focusMode);
+  document.querySelector('.main').classList.toggle('focus-mode', state.focusMode);
   updateWordCount();
 }
 
 function toggleFocus() {
   state.focusMode = !state.focusMode;
+  document.querySelector('.main').classList.toggle('focus-mode', state.focusMode);
   document.getElementById('editor').classList.toggle('focus-mode', state.focusMode);
   const btn = document.getElementById('focus-toggle');
   if (btn) btn.textContent = state.focusMode ? '▼' : '▲';

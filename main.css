@@ -131,11 +131,24 @@ textarea { resize: none; }
               padding-bottom 0.25s ease,
               border-bottom-width 0.25s ease;
 }
-.editor.focus-mode .frontmatter {
+.editor.focus-mode .frontmatter,
+.main.focus-mode .frontmatter {
   max-height: 0;
   padding-top: 0;
   padding-bottom: 0;
   border-bottom-width: 0;
+}
+
+/* Full focus mode on .main: hide sidebar + entry list, give body
+   gutter padding so writing column stays comfortable on wide screens. */
+.main.focus-mode { grid-template-columns: 1fr; }
+.main.focus-mode .rail,
+.main.focus-mode .list { display: none; }
+.main.focus-mode .body-pane {
+  /* Gutter: at least 60px each side; on wide windows, grow gutters
+     so the content column stays around 760px wide. */
+  padding-left: max(60px, calc(50% - 380px));
+  padding-right: max(60px, calc(50% - 380px));
 }
 
 .field { display: grid; grid-template-columns: 100px 1fr; gap: 14px; align-items: baseline; margin-bottom: 10px; }
