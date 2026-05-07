@@ -234,14 +234,8 @@ const CLIPS = {
 function insertClip(name) {
   const ta = document.getElementById('body');
   if (!ta) return;
-  const clip = CLIPS[name] || '';
-  const start = ta.selectionStart;
-  ta.value = ta.value.slice(0, start) + clip + ta.value.slice(ta.selectionEnd);
-  ta.selectionStart = ta.selectionEnd = start + clip.length;
-  state.current.body = ta.value;
-  state.dirty = true;
   ta.focus();
-  drawStatus();
+  document.execCommand('insertText', false, CLIPS[name] || '');
 }
 
 // ── markdown shortcuts ─────────────────────────────────────────────────────
@@ -258,31 +252,33 @@ function bindMarkdownShortcuts(ta) {
   });
 }
 
+// All edits go through document.execCommand('insertText') so the
+// browser's native undo/redo stack stays intact. Setting `ta.value`
+// directly works but kills ⌘Z.
+
 function wrapSelection(ta, before, after) {
+  ta.focus();
   const start = ta.selectionStart, end = ta.selectionEnd;
   const sel = ta.value.slice(start, end);
-  ta.value = ta.value.slice(0, start) + before + sel + after + ta.value.slice(end);
+  document.execCommand('insertText', false, before + sel + after);
+  // Cursor: place selection between the wrappers
   ta.selectionStart = start + before.length;
   ta.selectionEnd = end + before.length;
-  ta.dispatchEvent(new Event('input'));
 }
 
 function insertAt(ta, text) {
-  const start = ta.selectionStart;
-  ta.value = ta.value.slice(0, start) + text + ta.value.slice(ta.selectionEnd);
-  ta.selectionStart = ta.selectionEnd = start + text.length;
-  ta.dispatchEvent(new Event('input'));
+  ta.focus();
+  document.execCommand('insertText', false, text);
 }
 
 function insertLink(ta) {
+  ta.focus();
   const start = ta.selectionStart, end = ta.selectionEnd;
   const sel = ta.value.slice(start, end) || 'text';
-  const insert = `[${sel}](url)`;
-  ta.value = ta.value.slice(0, start) + insert + ta.value.slice(end);
-  // Cursor lands inside `(url)` so the next paste fills the URL
+  document.execCommand('insertText', false, `[${sel}](url)`);
+  // Cursor: select the `url` placeholder so a paste replaces it
   ta.selectionStart = start + sel.length + 3;
   ta.selectionEnd = start + sel.length + 6;
-  ta.dispatchEvent(new Event('input'));
 }
 
 function handleListEnter(ta, e) {
@@ -293,21 +289,19 @@ function handleListEnter(ta, e) {
   const m = currentLine.match(/^(\s*)([-*+] |(\d+)\. )/);
   if (!m) return;  // not on a list line — fall through to default Enter
   e.preventDefault();
+  ta.focus();
   const indent = m[1];
   let bullet = m[2];
   const remainder = currentLine.slice(m[0].length).trim();
   if (remainder === '') {
-    // Empty bullet — exit the list
-    ta.value = ta.value.slice(0, lineStart) + ta.value.slice(start);
-    ta.selectionStart = ta.selectionEnd = lineStart;
+    // Empty bullet — select the bullet text and delete it
+    ta.selectionStart = lineStart;
+    ta.selectionEnd = start;
+    document.execCommand('delete');
   } else {
-    // Continue list. Increment numeric bullets.
     if (m[3]) bullet = `${parseInt(m[3]) + 1}. `;
-    const insert = '\n' + indent + bullet;
-    ta.value = ta.value.slice(0, start) + insert + ta.value.slice(start);
-    ta.selectionStart = ta.selectionEnd = start + insert.length;
+    document.execCommand('insertText', false, '\n' + indent + bullet);
   }
-  ta.dispatchEvent(new Event('input'));
 }
 
 // ── save ───────────────────────────────────────────────────────────────────
