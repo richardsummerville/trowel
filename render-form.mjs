@@ -74,6 +74,7 @@ const enumInput = (opts, v, on) => {
 // ── array (chip input for string arrays; nested forms otherwise) ────────────
 
 function arrayInput(of, value, onChange) {
+  if (!Array.isArray(value)) value = [];  // defensive: backend may pass empty string for missing arrays
   const wrap = el('div', 'tag-list');
   const redraw = () => {
     wrap.innerHTML = '';

@@ -50,11 +50,11 @@ fn list_entries(collection: String) -> Result<Vec<EntrySummary>, String> {
         let (fm, _) = split_frontmatter(&raw);
         out.push(EntrySummary {
             slug: path.file_stem().unwrap().to_string_lossy().into(),
-            title: fm.get("title").cloned().unwrap_or_default(),
-            date: fm.get("date").cloned(),
-            status: fm.get("status").cloned(),
-            group: fm.get("group").cloned(),
-            kind: fm.get("type").cloned(),
+            title: fm.get("title").and_then(|v| v.as_str()).map(String::from).unwrap_or_default(),
+            date: fm.get("date").and_then(|v| v.as_str()).map(String::from),
+            status: fm.get("status").and_then(|v| v.as_str()).map(String::from),
+            group: fm.get("group").and_then(|v| v.as_str()).map(String::from),
+            kind: fm.get("type").and_then(|v| v.as_str()).map(String::from),
         });
     }
     out.sort_by(|a, b| b.date.cmp(&a.date));
@@ -66,8 +66,7 @@ fn read_entry(collection: String, slug: String) -> Result<Entry, String> {
     let path = entry_path(&collection, &slug).map_err(stringify)?;
     let raw = fs::read_to_string(&path).map_err(stringify)?;
     let (fm, body) = split_frontmatter(&raw);
-    let fm_value = serde_json::to_value(parse_frontmatter_typed(&fm))
-        .map_err(stringify)?;
+    let fm_value = serde_json::Value::Object(fm.into_iter().collect());
     Ok(Entry {
         slug,
         fm: fm_value,
@@ -179,36 +178,65 @@ fn entry_path(collection: &str, slug: &str) -> anyhow::Result<PathBuf> {
     Ok(path)
 }
 
-// ── frontmatter (mirrors the JS server's behaviour for flat schemas) ────────
+// ── frontmatter ────────────────────────────────────────────────────────────
+//
+// Hand-rolled YAML parser/writer. Handles:
+//   - Scalar values: `key: value` and `key: "quoted value"`
+//   - Flat string arrays:
+//         tags:
+//           - one
+//           - two
+// Doesn't handle: nested objects (project.links, gallery.media[]) — those
+// come back as strings and need a richer parser. For now experiments and
+// notes round-trip cleanly, which is the 90% case.
 
-fn split_frontmatter(raw: &str) -> (BTreeMap<String, String>, String) {
-    let mut map = BTreeMap::new();
+fn split_frontmatter(raw: &str) -> (BTreeMap<String, serde_json::Value>, String) {
+    let mut map: BTreeMap<String, serde_json::Value> = BTreeMap::new();
     if !raw.starts_with("---\n") { return (map, raw.to_string()); }
     let rest = &raw[4..];
-    if let Some(idx) = rest.find("\n---") {
-        let yaml = &rest[..idx];
-        let body_start = idx + 4;
-        let body = rest.get(body_start..).unwrap_or("").trim_start_matches('\n').to_string();
-        for line in yaml.lines() {
-            if let Some((k, v)) = line.split_once(':') {
-                map.insert(k.trim().into(), v.trim().trim_matches('"').into());
+    let Some(idx) = rest.find("\n---") else { return (map, raw.to_string()); };
+    let yaml = &rest[..idx];
+    let body_start = idx + 4;
+    let body = rest.get(body_start..).unwrap_or("").trim_start_matches('\n').to_string();
+
+    let mut pending_array_key: Option<String> = None;
+    let mut pending_array: Vec<serde_json::Value> = Vec::new();
+
+    let flush = |key: &mut Option<String>, items: &mut Vec<serde_json::Value>, map: &mut BTreeMap<String, serde_json::Value>| {
+        if let Some(k) = key.take() {
+            map.insert(k, serde_json::Value::Array(std::mem::take(items)));
+        }
+    };
+
+    for line in yaml.lines() {
+        let trimmed = line.trim_start();
+        // Array continuation: indented `- value`
+        if pending_array_key.is_some() {
+            if let Some(item) = trimmed.strip_prefix("- ") {
+                let v = item.trim().trim_matches('"');
+                pending_array.push(serde_json::Value::String(v.into()));
+                continue;
+            }
+            // Non-list line ends the array
+            flush(&mut pending_array_key, &mut pending_array, &mut map);
+        }
+
+        if let Some((k, v)) = line.split_once(':') {
+            let k = k.trim().to_string();
+            let v = v.trim();
+            if v.is_empty() {
+                // Could be array start or empty scalar — wait for next line
+                pending_array_key = Some(k);
+            } else {
+                let unquoted = v.trim_matches('"');
+                map.insert(k, serde_json::Value::String(unquoted.into()));
             }
         }
-        return (map, body);
     }
-    (map, raw.to_string())
-}
+    // Flush trailing array
+    flush(&mut pending_array_key, &mut pending_array, &mut map);
 
-/// Map a flat YAML frontmatter into a typed JSON object. Arrays still arrive
-/// as comma-separated or newline-separated strings; we normalise to JSON arrays
-/// when the value spans multiple `-` lines. For nested objects (project links,
-/// gallery media) we leave the raw string and the writer handles them later.
-fn parse_frontmatter_typed(fm: &BTreeMap<String, String>) -> serde_json::Map<String, serde_json::Value> {
-    let mut out = serde_json::Map::new();
-    for (k, v) in fm {
-        out.insert(k.clone(), serde_json::Value::String(v.clone()));
-    }
-    out
+    (map, body)
 }
 
 fn serialize_frontmatter(fm: &serde_json::Value, body: &str) -> String {

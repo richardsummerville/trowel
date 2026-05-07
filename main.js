@@ -98,12 +98,17 @@ function drawList() {
 
 async function openEntry(slug) {
   if (state.dirty && !confirm('Discard unsaved changes?')) return;
-  const entry = await invoke('read_entry', { collection: state.collection, slug });
-  state.current = { slug: entry.slug, fm: entry.fm || {}, body: entry.body || '', isNew: false };
-  state.dirty = false;
-  drawList();
-  drawEditor();
-  drawStatus();
+  try {
+    const entry = await invoke('read_entry', { collection: state.collection, slug });
+    state.current = { slug: entry.slug, fm: entry.fm || {}, body: entry.body || '', isNew: false };
+    state.dirty = false;
+    drawList();
+    drawEditor();
+    drawStatus();
+  } catch (err) {
+    console.error('openEntry failed', err);
+    document.getElementById('status-collection').textContent = `error: ${err.message ?? err}`;
+  }
 }
 
 function newEntry() {
