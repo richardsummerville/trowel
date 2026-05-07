@@ -126,15 +126,18 @@ fn project_root() -> anyhow::Result<PathBuf> {
         anyhow::bail!("PIXELBRIX_ROOT does not point to a pixelbrix-site project: {:?}", p);
     }
 
-    // 2. Walk up from CWD. At each level, check the directory itself and
-    //    its `pixelbrix-site` child — Trowel is a sibling of pixelbrix-site
-    //    in the canonical layout (pixelbrix/{trowel,pixelbrix-site}), so the
-    //    sibling check is what discovers it.
+    // 2. Walk up from CWD. At each level, check three patterns:
+    //    a) the directory itself is pixelbrix-site
+    //    b) `<dir>/pixelbrix-site/` (direct sibling layout)
+    //    c) `<dir>/pixelbrix/pixelbrix-site/` (umbrella layout — Trowel sits in
+    //       Projects/ at top level, pixelbrix-site sits in Projects/pixelbrix/)
     let mut dir = env::current_dir()?;
     loop {
         if is_pixelbrix_site(&dir).unwrap_or(false) { return Ok(dir); }
         let sibling = dir.join("pixelbrix-site");
         if is_pixelbrix_site(&sibling).unwrap_or(false) { return Ok(sibling); }
+        let nested = dir.join("pixelbrix").join("pixelbrix-site");
+        if is_pixelbrix_site(&nested).unwrap_or(false) { return Ok(nested); }
         if !dir.pop() { break; }
     }
 
