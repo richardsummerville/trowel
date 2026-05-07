@@ -1,20 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <rect width="1024" height="1024" fill="#ffffff"/>
+  <!-- Outer surface visible through the cut corner -->
+  <rect width="1024" height="1024" fill="#e6e6e6"/>
 
-  <!-- Pointing trowel — horizontal, blade pointing left, handle on right.
-       Visually centered: total span x=160-860 (center 510), y=340-684 (center 512). -->
+  <!-- Paper: pentagon — top-right corner cut at +30° angle (mirrors the
+       trowel blade's slope which runs at -30° from tip to back). -->
+  <path d="M 0 0
+           L 724 0
+           L 1024 174
+           L 1024 1024
+           L 0 1024 Z"
+        fill="#ffffff"/>
+
+  <!-- Faux fold underside: subtle triangle suggesting the corner has
+       been turned down rather than removed. -->
+  <path d="M 724 0
+           L 1024 174
+           L 724 174 Z"
+        fill="#f4f4f4"/>
+
+  <!-- Fold crease line -->
+  <line x1="724" y1="0" x2="1024" y2="174"
+        stroke="#d0d0d0" stroke-width="3"/>
+
+  <!-- Trowel silhouette: blade pointing left, handle on right -->
   <g fill="#111111">
-    <!-- Blade: leaf shape, pointed tip, slightly asymmetric -->
     <path d="M 160 512
              L 460 340
              L 620 360
              L 620 664
-             L 460 684
-             Z"/>
-    <!-- Shank connecting blade to handle -->
+             L 460 684 Z"/>
     <rect x="620" y="476" width="60" height="72"/>
-    <!-- Handle: vertical rounded bar -->
     <rect x="680" y="356" width="180" height="312" rx="50"/>
   </g>
 </svg>

@@ -34,6 +34,16 @@ async function boot() {
     el.onclick = () => runScript(el.dataset.script);
   }
   document.getElementById('log-close').onclick = hideLog;
+
+  // Tauri+WebKit bug: CSS app-region drag stops working after fullscreen
+  // toggle. Toggle the property to force WebKit to re-establish drag regions
+  // whenever the window is resized (fires on fullscreen enter/exit).
+  window.addEventListener('resize', () => {
+    const toolbar = document.querySelector('.toolbar');
+    if (!toolbar) return;
+    toolbar.style.webkitAppRegion = 'no-drag';
+    setTimeout(() => toolbar.style.removeProperty('-webkit-app-region'), 50);
+  });
 }
 
 // ── left rail ──────────────────────────────────────────────────────────────
