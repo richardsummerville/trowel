@@ -18,6 +18,7 @@ const state = {
   current: null,                // { slug, fm, body, isNew }
   dirty: false,
   counts: {},
+  focusMode: false,             // when true, frontmatter form slides up
 };
 
 // ── boot ───────────────────────────────────────────────────────────────────
@@ -182,6 +183,8 @@ function drawEditor() {
       <button data-clip="frontispiece">Frontispiece</button>
       <button data-clip="code">Code</button>
       <span class="word-count" id="word-count"></span>
+      <button id="focus-toggle" class="focus-toggle"
+              title="Toggle focus mode (⌘⇧F)">${state.focusMode ? '▼' : '▲'}</button>
     </div>
     <textarea class="body" id="body"></textarea>`;
   pane.querySelector('#body').value = state.current.body;
@@ -194,10 +197,19 @@ function drawEditor() {
   for (const btn of pane.querySelectorAll('[data-clip]')) {
     btn.onclick = () => insertClip(btn.dataset.clip);
   }
+  pane.querySelector('#focus-toggle').onclick = toggleFocus;
 
   root.appendChild(fm);
   root.appendChild(pane);
+  root.classList.toggle('focus-mode', state.focusMode);
   updateWordCount();
+}
+
+function toggleFocus() {
+  state.focusMode = !state.focusMode;
+  document.getElementById('editor').classList.toggle('focus-mode', state.focusMode);
+  const btn = document.getElementById('focus-toggle');
+  if (btn) btn.textContent = state.focusMode ? '▼' : '▲';
 }
 
 function updateWordCount() {
@@ -315,6 +327,9 @@ function bindShortcuts() {
     if (meta && e.key === '1') { e.preventDefault(); selectCollection('projects'); }
     if (meta && e.key === '2') { e.preventDefault(); selectCollection('experiments'); }
     if (meta && e.key === '3') { e.preventDefault(); selectCollection('gallery'); }
+    if (meta && e.shiftKey && (e.key === 'F' || e.key === 'f')) {
+      e.preventDefault(); toggleFocus();
+    }
   });
 }
 
