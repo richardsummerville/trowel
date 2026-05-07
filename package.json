@@ -4,7 +4,7 @@
   "private": true,
   "description": "Schema-driven desktop editor for the pixelbrix.com content collections.",
   "scripts": {
-    "dev": "cd src-tauri && cargo tauri dev",
-    "build": "cd src-tauri && cargo tauri build"
+    "dev": "cd src-tauri && PATH=\"$HOME/.cargo/bin:$PATH\" cargo tauri dev",
+    "build": "cd src-tauri && PATH=\"$HOME/.cargo/bin:$PATH\" cargo tauri build"
   }
 }
