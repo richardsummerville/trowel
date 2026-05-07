@@ -94,6 +94,14 @@ fn write_entry(
 }
 
 #[tauri::command]
+fn start_drag(window: tauri::WebviewWindow) -> Result<(), String> {
+    // Direct OS-level window drag — more reliable than CSS app-region or
+    // data-tauri-drag-region attribute, both of which lose state after
+    // macOS fullscreen toggle.
+    window.start_dragging().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 async fn run_sync(script: String) -> Result<String, String> {
     let allowed = ["sync:notes", "sync:sources", "prefetch:books"];
     if !allowed.contains(&script.as_str()) {
@@ -312,6 +320,7 @@ pub fn run() {
             read_entry,
             write_entry,
             run_sync,
+            start_drag,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

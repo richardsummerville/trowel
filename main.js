@@ -34,6 +34,15 @@ async function boot() {
     el.onclick = () => runScript(el.dataset.script);
   }
   document.getElementById('log-close').onclick = hideLog;
+
+  // Window drag — direct invoke('start_drag') on toolbar mousedown.
+  // CSS -webkit-app-region and data-tauri-drag-region both broke after
+  // macOS fullscreen toggle; this calls window.start_dragging() in Rust
+  // which delegates to the OS and survives state changes.
+  document.getElementById('toolbar').addEventListener('mousedown', e => {
+    if (e.target.closest('button, input, a, select, textarea')) return;
+    invoke('start_drag').catch(err => console.error('start_drag', err));
+  });
 }
 
 // ── left rail ──────────────────────────────────────────────────────────────
