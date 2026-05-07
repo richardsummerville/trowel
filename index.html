@@ -55,6 +55,15 @@
     <span id="status-path" class="mono">—</span>
   </div>
 
+  <!-- Sync script log overlay — populated by runScript, click X to dismiss -->
+  <div id="log-panel" class="log-panel hidden">
+    <div class="log-header">
+      <span id="log-title" class="mono"></span>
+      <button id="log-close">×</button>
+    </div>
+    <pre id="log-body" class="mono"></pre>
+  </div>
+
 </div>
 
 <script type="module" src="main.js"></script>

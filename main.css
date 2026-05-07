@@ -200,3 +200,49 @@ textarea { resize: none; }
 .status .spacer { flex: 1; }
 .status .save-state.dirty { color: var(--warn); }
 .status .save-state.dirty::before { content: '● '; }
+
+/* ── log panel (sync script output) ──────────────────────────────── */
+.log-panel {
+  position: fixed;
+  right: 16px;
+  bottom: 38px;
+  width: min(640px, 50vw);
+  max-height: 360px;
+  background: #fff;
+  border: 1px solid var(--rule);
+  box-shadow: 0 2px 0 var(--rule);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+}
+.log-panel.hidden { display: none; }
+.log-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--faint-bg);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.log-header button {
+  font-size: 16px;
+  color: var(--muted);
+  padding: 0 4px;
+  line-height: 1;
+}
+.log-header button:hover { color: var(--ink); }
+.log-panel pre {
+  margin: 0;
+  padding: 12px 14px;
+  overflow-y: auto;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #fff;
+  flex: 1;
+}
+.log-panel.error pre { color: var(--warn); }

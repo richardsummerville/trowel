@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" fill="#ffffff"/>
+
+  <!-- Pointing trowel — horizontal, blade pointing left, handle on right.
+       Visually centered: total span x=160-860 (center 510), y=340-684 (center 512). -->
+  <g fill="#111111">
+    <!-- Blade: leaf shape, pointed tip, slightly asymmetric -->
+    <path d="M 160 512
+             L 460 340
+             L 620 360
+             L 620 664
+             L 460 684
+             Z"/>
+    <!-- Shank connecting blade to handle -->
+    <rect x="620" y="476" width="60" height="72"/>
+    <!-- Handle: vertical rounded bar -->
+    <rect x="680" y="356" width="180" height="312" rx="50"/>
+  </g>
+</svg>

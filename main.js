@@ -33,6 +33,7 @@ async function boot() {
   for (const el of document.querySelectorAll('[data-script]')) {
     el.onclick = () => runScript(el.dataset.script);
   }
+  document.getElementById('log-close').onclick = hideLog;
 }
 
 // ── left rail ──────────────────────────────────────────────────────────────
@@ -249,14 +250,37 @@ async function save() {
 }
 
 async function runScript(script) {
+  showLog(`${script} · running…`, '', false);
   document.getElementById('status-collection').textContent = `running ${script}…`;
   try {
-    await invoke('run_sync', { script });
+    const stdout = await invoke('run_sync', { script });
     document.getElementById('status-collection').textContent = `${script} ✓`;
+    showLog(`${script} · done`, stdout || '(no output)', false);
+    // If the sync touched a collection, refresh the list
+    if (script === 'sync:notes' && state.collection === 'notes') {
+      await selectCollection('notes');
+    }
   } catch (err) {
+    const msg = err?.message ?? String(err);
     document.getElementById('status-collection').textContent = `${script} failed`;
+    showLog(`${script} · failed`, msg, true);
     console.error(err);
   }
+}
+
+function showLog(title, body, isError) {
+  const panel = document.getElementById('log-panel');
+  panel.classList.remove('hidden');
+  panel.classList.toggle('error', !!isError);
+  document.getElementById('log-title').textContent = title;
+  document.getElementById('log-body').textContent = body;
+  // Scroll to bottom of long output
+  const pre = document.getElementById('log-body');
+  pre.scrollTop = pre.scrollHeight;
+}
+
+function hideLog() {
+  document.getElementById('log-panel').classList.add('hidden');
 }
 
 // ── status bar ─────────────────────────────────────────────────────────────
