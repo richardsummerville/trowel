@@ -47,9 +47,9 @@ textarea { resize: none; }
   font-family: 'IBM Plex Mono', monospace;
   font-size: 11px;
   letter-spacing: 0.04em;
-  -webkit-app-region: drag;
 }
-.toolbar button, .toolbar input, .toolbar a { -webkit-app-region: no-drag; }
+/* Drag handled via data-tauri-drag-region in HTML — more reliable than
+   -webkit-app-region, which loses state after fullscreen toggle. */
 .toolbar .brand { color: var(--accent); font-weight: 600; margin-left: 70px; margin-right: 14px; }
 .toolbar button { padding: 4px 10px; color: var(--muted); }
 .toolbar button:hover { color: var(--ink); }
