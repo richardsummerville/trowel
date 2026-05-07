@@ -194,6 +194,7 @@ function drawEditor() {
     updateWordCount();
     drawStatus();
   };
+  bindMarkdownShortcuts(pane.querySelector('#body'));
   for (const btn of pane.querySelectorAll('[data-clip]')) {
     btn.onclick = () => insertClip(btn.dataset.clip);
   }
@@ -241,6 +242,72 @@ function insertClip(name) {
   state.dirty = true;
   ta.focus();
   drawStatus();
+}
+
+// ── markdown shortcuts ─────────────────────────────────────────────────────
+
+function bindMarkdownShortcuts(ta) {
+  ta.addEventListener('keydown', e => {
+    const meta = e.metaKey || e.ctrlKey;
+    if (meta && !e.shiftKey && e.key === 'b') { e.preventDefault(); wrapSelection(ta, '**', '**'); }
+    else if (meta && !e.shiftKey && e.key === 'i') { e.preventDefault(); wrapSelection(ta, '*', '*'); }
+    else if (meta && e.shiftKey && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); wrapSelection(ta, '`', '`'); }
+    else if (meta && !e.shiftKey && e.key === 'k') { e.preventDefault(); insertLink(ta); }
+    else if (e.key === 'Tab' && !e.shiftKey && !meta) { e.preventDefault(); insertAt(ta, '  '); }
+    else if (e.key === 'Enter' && !e.shiftKey && !meta) { handleListEnter(ta, e); }
+  });
+}
+
+function wrapSelection(ta, before, after) {
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  const sel = ta.value.slice(start, end);
+  ta.value = ta.value.slice(0, start) + before + sel + after + ta.value.slice(end);
+  ta.selectionStart = start + before.length;
+  ta.selectionEnd = end + before.length;
+  ta.dispatchEvent(new Event('input'));
+}
+
+function insertAt(ta, text) {
+  const start = ta.selectionStart;
+  ta.value = ta.value.slice(0, start) + text + ta.value.slice(ta.selectionEnd);
+  ta.selectionStart = ta.selectionEnd = start + text.length;
+  ta.dispatchEvent(new Event('input'));
+}
+
+function insertLink(ta) {
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  const sel = ta.value.slice(start, end) || 'text';
+  const insert = `[${sel}](url)`;
+  ta.value = ta.value.slice(0, start) + insert + ta.value.slice(end);
+  // Cursor lands inside `(url)` so the next paste fills the URL
+  ta.selectionStart = start + sel.length + 3;
+  ta.selectionEnd = start + sel.length + 6;
+  ta.dispatchEvent(new Event('input'));
+}
+
+function handleListEnter(ta, e) {
+  const start = ta.selectionStart;
+  const before = ta.value.slice(0, start);
+  const lineStart = before.lastIndexOf('\n') + 1;
+  const currentLine = before.slice(lineStart);
+  const m = currentLine.match(/^(\s*)([-*+] |(\d+)\. )/);
+  if (!m) return;  // not on a list line — fall through to default Enter
+  e.preventDefault();
+  const indent = m[1];
+  let bullet = m[2];
+  const remainder = currentLine.slice(m[0].length).trim();
+  if (remainder === '') {
+    // Empty bullet — exit the list
+    ta.value = ta.value.slice(0, lineStart) + ta.value.slice(start);
+    ta.selectionStart = ta.selectionEnd = lineStart;
+  } else {
+    // Continue list. Increment numeric bullets.
+    if (m[3]) bullet = `${parseInt(m[3]) + 1}. `;
+    const insert = '\n' + indent + bullet;
+    ta.value = ta.value.slice(0, start) + insert + ta.value.slice(start);
+    ta.selectionStart = ta.selectionEnd = start + insert.length;
+  }
+  ta.dispatchEvent(new Event('input'));
 }
 
 // ── save ───────────────────────────────────────────────────────────────────
