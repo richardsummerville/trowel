@@ -33,7 +33,6 @@
     "active": true,
     "targets": ["dmg", "app"],
     "icon": [
-      "icons/icon.icns",
       "icons/icon.png"
     ],
     "category": "DeveloperTool",
