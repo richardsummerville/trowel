@@ -1,0 +1,59 @@
+{
+  "notes": [
+    { "name": "title",   "kind": "string", "required": true },
+    { "name": "type",    "kind": "enum",   "required": true,  "options": ["article", "concept"] },
+    { "name": "date",    "kind": "date",   "required": true },
+    { "name": "status",  "kind": "enum",   "required": false, "options": ["draft", "published"], "default": "draft" },
+    { "name": "aliases", "kind": "array",  "required": false, "of": { "kind": "string" } },
+    { "name": "sources", "kind": "array",  "required": false, "of": { "kind": "string" } },
+    { "name": "tags",    "kind": "array",  "required": false, "of": { "kind": "string" } },
+    { "name": "summary", "kind": "string", "required": false },
+    { "name": "image",   "kind": "string", "required": false }
+  ],
+  "projects": [
+    { "name": "title",   "kind": "string", "required": true },
+    { "name": "date",    "kind": "date",   "required": true },
+    { "name": "year",    "kind": "number", "required": false },
+    { "name": "status",  "kind": "enum",   "required": false, "options": ["active", "shipped", "paused", "archived"], "default": "active" },
+    { "name": "summary", "kind": "string", "required": true },
+    { "name": "role",    "kind": "string", "required": false },
+    { "name": "private", "kind": "boolean","required": false },
+    {
+      "name": "links", "kind": "object", "required": false,
+      "fields": [
+        { "name": "repo", "kind": "string", "required": false },
+        { "name": "demo", "kind": "string", "required": false },
+        { "name": "docs", "kind": "string", "required": false }
+      ]
+    },
+    { "name": "hero", "kind": "string", "required": false },
+    { "name": "tags", "kind": "array",  "required": false, "of": { "kind": "string" } }
+  ],
+  "experiments": [
+    { "name": "title",   "kind": "string", "required": true },
+    { "name": "date",    "kind": "date",   "required": true },
+    { "name": "group",   "kind": "enum",   "required": false, "options": ["code", "books", "music"], "default": "code" },
+    { "name": "summary", "kind": "string", "required": false },
+    { "name": "image",   "kind": "string", "required": false },
+    { "name": "snippet", "kind": "string", "required": false },
+    { "name": "tags",    "kind": "array",  "required": false, "of": { "kind": "string" } }
+  ],
+  "gallery": [
+    { "name": "title", "kind": "string", "required": true },
+    { "name": "date",  "kind": "date",   "required": true },
+    { "name": "description", "kind": "string", "required": false },
+    {
+      "name": "media", "kind": "array", "required": true,
+      "of": {
+        "kind": "object",
+        "fields": [
+          { "name": "type",    "kind": "enum",   "required": true, "options": ["image", "video"] },
+          { "name": "src",     "kind": "string", "required": true },
+          { "name": "caption", "kind": "string", "required": false },
+          { "name": "alt",     "kind": "string", "required": false }
+        ]
+      }
+    },
+    { "name": "tags", "kind": "array", "required": false, "of": { "kind": "string" } }
+  ]
+}

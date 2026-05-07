@@ -1,0 +1,10 @@
+# Tauri / Rust build output
+target/
+gen/
+icons/icon.icns
+icons/icon.png
+*.app/
+*.dmg
+
+# OS
+.DS_Store

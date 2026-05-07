@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Trowel</title>
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+<div class="window">
+
+  <div class="toolbar">
+    <span class="brand">TROWEL</span>
+    <span class="spacer"></span>
+    <button id="save-btn">Save (⌘S)</button>
+    <button id="new-btn">New (⌘N)</button>
+  </div>
+
+  <div class="main">
+
+    <div class="rail">
+      <div class="rail-section">
+        <div class="rail-label">Collections</div>
+        <div id="collections"></div>
+      </div>
+      <div class="rail-section">
+        <div class="rail-label">Tools</div>
+        <div class="rail-item" data-script="sync:notes"><span>Sync notes</span></div>
+        <div class="rail-item" data-script="sync:sources"><span>Sync sources</span></div>
+        <div class="rail-item" data-script="prefetch:books"><span>Fetch books</span></div>
+      </div>
+    </div>
+
+    <div class="list">
+      <div class="list-header">
+        <span id="list-title">—</span>
+        <button class="new-btn" id="new-list-btn">+ New</button>
+      </div>
+      <div id="entries"></div>
+    </div>
+
+    <div class="editor" id="editor">
+      <div class="editor-empty">
+        <div>No entry selected.</div>
+        <div class="hint">⌘N to create one · click an entry to edit</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="status">
+    <span id="status-collection" class="ok">ready</span>
+    <span id="status-counts">—</span>
+    <span class="spacer"></span>
+    <span id="save-state" class="save-state">saved</span>
+    <span id="status-path" class="mono">—</span>
+  </div>
+
+</div>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>
